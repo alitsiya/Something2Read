@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Something2Read</string>
+    <string name="search_query_hint">Enter Search Query</string>
+    <string name="search_button">Search</string>
+</resources>
