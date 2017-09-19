@@ -2,4 +2,19 @@
     <string name="app_name">Something2Read</string>
     <string name="search_query_hint">Enter Search Query</string>
     <string name="search_button">Search</string>
+    <string name="action_settings">Settings</string>
+    <string name="begin_date_label">Begin Date</string>
+    <string name="begin_date_picker">2016/09/18</string>
+    <string name="sort_order_label">Sort Order</string>
+    <string name="sort_order_picker">Oldest</string>
+    <string name="news_values_label">News Desk Values</string>
+    <string name="arts_checkbox">Arts</string>
+    <string name="fashion_checkbox"><![CDATA[Fashion & Style]]></string>
+    <string name="sports_checkbox">Sports</string>
+    <string name="save_button">Save</string>
+
+    <string-array name="order_arrays">
+        <item>Oldest</item>
+        <item>Newest</item>
+    </string-array>
 </resources>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/begin_date_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="22dp"
+        android:layout_marginStart="22dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/begin_date_label"/>
+
+    <EditText
+        android:id="@+id/begin_date_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginEnd="11dp"
+        android:layout_marginRight="11dp"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:onClick="showDatePickerDialog"
+        android:text="@string/begin_date_picker"/>
+
+    <TextView
+        android:id="@+id/sort_order_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignEnd="@+id/begin_date_label"
+        android:layout_alignRight="@+id/begin_date_label"
+        android:layout_below="@+id/begin_date_picker"
+        android:layout_marginTop="35dp"
+        android:text="@string/sort_order_label"/>
+
+    <Spinner
+        android:id="@+id/sort_order_picker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:entries="@array/order_arrays"
+        android:inputType="textPersonName"
+        android:text="@string/sort_order_picker"
+        android:layout_alignBaseline="@+id/sort_order_label"
+        android:layout_alignBottom="@+id/sort_order_label"
+        android:layout_alignLeft="@+id/begin_date_picker"
+        android:layout_alignStart="@+id/begin_date_picker"/>
+
+    <TextView
+        android:id="@+id/news_values_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/begin_date_label"
+        android:layout_alignStart="@+id/begin_date_label"
+        android:layout_below="@+id/sort_order_label"
+        android:layout_marginTop="50dp"
+        android:text="@string/news_values_label"/>
+
+    <CheckBox
+        android:id="@+id/checkBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/news_values_label"
+        android:layout_alignLeft="@+id/sort_order_picker"
+        android:layout_alignStart="@+id/sort_order_picker"
+        android:text="@string/arts_checkbox"/>
+
+    <CheckBox
+        android:id="@+id/checkBox2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/checkBox"
+        android:layout_alignStart="@+id/checkBox"
+        android:layout_below="@+id/checkBox"
+        android:layout_marginTop="20dp"
+        android:text="@string/fashion_checkbox"/>
+
+    <CheckBox
+        android:id="@+id/checkBox3"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/checkBox2"
+        android:layout_alignStart="@+id/checkBox2"
+        android:layout_marginTop="20dp"
+        android:layout_below="@+id/checkBox2"
+        android:layout_centerVertical="true"
+        android:text="@string/sports_checkbox"/>
+
+    <Button
+        android:id="@+id/save_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/margin"
+        android:layout_below="@id/checkBox3"
+        android:text="@string/save_button"
+        android:layout_centerHorizontal="true"/>
+</RelativeLayout>
