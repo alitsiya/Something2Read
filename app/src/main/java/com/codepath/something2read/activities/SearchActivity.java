@@ -1,10 +1,12 @@
 package com.codepath.something2read.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -13,6 +15,7 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.codepath.something2read.R;
 import com.codepath.something2read.adapters.ArticleArrayAdapter;
@@ -30,14 +33,18 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import cz.msebera.android.httpclient.Header;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.codepath.something2read.activities.SettingsActivity.NEWS_DESK;
 import static com.codepath.something2read.activities.SettingsActivity.SORT_ORDER;
 import static com.codepath.something2read.activities.SettingsActivity.PREFS_NAME;
 import static com.codepath.something2read.activities.SettingsActivity.STARTING_DATE;
 
-public class MainActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity {
+    private final Logger mLogger = LoggerFactory.getLogger(SearchActivity.class);
 
     @BindView(R.id.etQuery) EditText etQuery;
     @BindView(R.id.btnSearch) Button btnSearch;
@@ -53,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_search);
 
         ButterKnife.bind(this);
         mAdapter = new ArticleArrayAdapter(this, mArticles);
@@ -74,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
                 // Triggered only when new data needs to be appended to the list
                 loadNextDataFromApi(page);
                 // or loadNextDataFromApi(totalItemsCount);
-                return true; // TODO ONLY if more data is actually being loaded; false otherwise.
+                return true;
             }
         });
         btnSearch.setOnClickListener(new View.OnClickListener() {
@@ -82,7 +89,11 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mAdapter.clear();
                 etQuery.onEditorAction(EditorInfo.IME_ACTION_DONE);
-                onArticleSearch(0);
+                if (isNetworkAvailable() || isOnline()) {
+                    onArticleSearch(0);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Network is not available", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
@@ -139,12 +150,10 @@ public class MainActivity extends AppCompatActivity {
                 Intent i = new Intent(getApplicationContext(), SettingsActivity.class);
                 startActivity(i);
                 return true;
-
             default:
                 // If we got here, the user's action was not recognized.
                 // Invoke the superclass to handle it.
                 return super.onOptionsItemSelected(item);
-
         }
     }
 
@@ -160,6 +169,28 @@ public class MainActivity extends AppCompatActivity {
             params.put("fq", newsDeskQuery);
         }
         return params;
+    }
+
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+            = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
+    }
+
+    //using this method as a helper method since it returns false of Pixel
+    public boolean isOnline() {
+        Runtime runtime = Runtime.getRuntime();
+        try {
+            Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");
+            int     exitValue = ipProcess.waitFor();
+            return (exitValue == 0);
+        } catch (IOException e) {
+            mLogger.debug("IsOnline returns IOException " + e);
+        } catch (InterruptedException e) {
+            mLogger.debug("IsOnline returns InterruptedException " + e);
+        }
+        return false;
     }
 
 }
