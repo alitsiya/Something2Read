@@ -6,14 +6,15 @@ import android.content.SharedPreferences;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.Toast;
 
@@ -46,12 +47,11 @@ import static com.codepath.something2read.activities.SettingsActivity.STARTING_D
 public class SearchActivity extends AppCompatActivity {
     private final Logger mLogger = LoggerFactory.getLogger(SearchActivity.class);
 
-    @BindView(R.id.etQuery) EditText etQuery;
-    @BindView(R.id.btnSearch) Button btnSearch;
     @BindView(R.id.gvResults) GridView gvResults;
 
     ArrayList<Article> mArticles = new ArrayList<>();
     ArticleArrayAdapter mAdapter;
+    private String mQuery;
     private SharedPreferences mSharedPreferences;
 
     private static String SEARCH_API_ENDPOINT = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
@@ -63,6 +63,13 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         ButterKnife.bind(this);
+
+        // Find the toolbar view inside the activity layout
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        // Sets the Toolbar to act as the ActionBar for this Activity window.
+        // Make sure the toolbar exists in the activity and is not null
+        setSupportActionBar(toolbar);
+
         mAdapter = new ArticleArrayAdapter(this, mArticles);
         gvResults.setAdapter(mAdapter);
         mSharedPreferences = getSharedPreferences(PREFS_NAME, 0);
@@ -84,18 +91,6 @@ public class SearchActivity extends AppCompatActivity {
                 return true;
             }
         });
-        btnSearch.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mAdapter.clear();
-                etQuery.onEditorAction(EditorInfo.IME_ACTION_DONE);
-                if (isNetworkAvailable() || isOnline()) {
-                    onArticleSearch(0);
-                } else {
-                    Toast.makeText(getApplicationContext(), "Network is not available", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
     }
 
     // Append the next page of data into the adapter
@@ -106,13 +101,12 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     public void onArticleSearch(int page) {
-        String query = etQuery.getText().toString();
         AsyncHttpClient client = new AsyncHttpClient();
 
         RequestParams params = new RequestParams();
         params.put("api-key", API_KEY);
         params.put("page", page);
-        params.put("q", query);
+        params.put("q", mQuery);
         params = getAdditionalRequestParametersFromPrefs(params);
         client.get(SEARCH_API_ENDPOINT, params, new JsonHttpResponseHandler() {
             @Override
@@ -137,9 +131,34 @@ public class SearchActivity extends AppCompatActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.settings_menu, menu);
-        return true;
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.settings_menu, menu);
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // perform query here
+                mQuery = query;
+                mAdapter.clear();
+                if (isNetworkAvailable() || isOnline()) {
+                    onArticleSearch(0);
+                } else {
+                    Toast.makeText(getApplicationContext(), "Network is not available", Toast.LENGTH_SHORT).show();
+                }
+                // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
+                // see https://code.google.com/p/android/issues/detail?id=24599
+                searchView.clearFocus();
+
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -165,8 +184,8 @@ public class SearchActivity extends AppCompatActivity {
         String order = mSharedPreferences.getString(SORT_ORDER, "newest");
         params.put("sort", order);
         String newsDeskQuery = mSharedPreferences.getString(NEWS_DESK, null);
-        if (newsDeskQuery != null) {
-            params.put("fq", newsDeskQuery);
+        if (!newsDeskQuery.isEmpty()) {
+            params.put("fq", "news_desk:(" + newsDeskQuery + ")");
         }
         return params;
     }
@@ -179,7 +198,7 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     //using this method as a helper method since it returns false of Pixel
-    public boolean isOnline() {
+    private boolean isOnline() {
         Runtime runtime = Runtime.getRuntime();
         try {
             Process ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8");

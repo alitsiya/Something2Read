@@ -46,7 +46,6 @@
         android:ems="10"
         android:entries="@array/order_arrays"
         android:inputType="textPersonName"
-        android:text="@string/sort_order_picker"
         android:layout_alignBaseline="@+id/sort_order_label"
         android:layout_alignBottom="@+id/sort_order_label"
         android:layout_alignLeft="@+id/begin_date_picker"

@@ -12,6 +12,7 @@
     <string name="fashion_checkbox"><![CDATA[Fashion & Style]]></string>
     <string name="sports_checkbox">Sports</string>
     <string name="save_button">Save</string>
+    <string name="search">Search</string>
 
     <string-array name="order_arrays">
         <item>Oldest</item>

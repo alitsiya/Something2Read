@@ -20,8 +20,6 @@ import butterknife.ButterKnife;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class SettingsActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
     @BindView(R.id.save_button) Button btnSaveButton;
@@ -47,43 +45,18 @@ public class SettingsActivity extends AppCompatActivity implements DatePickerDia
         ButterKnife.bind(this);
 
         mSharedPreferences = getSharedPreferences(PREFS_NAME, 0);
-        setSavedSettingsToUI();
+        applySavedSettingsToUI();
+
         btnSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String date = parseDate(etDatePicker.getText().toString());
-                String order = spnSortOrder.getSelectedItem().toString();
-                StringBuilder newsDeskQuery = new StringBuilder("news_desk:(");
-                List<String> listOfNewsDesk = new ArrayList<>();
-                if (cbArtsCheckBox.isChecked()) {
-                    listOfNewsDesk.add("\"Arts\"");
-                }
-                if (cbFashionCheckBox.isChecked()) {
-                    listOfNewsDesk.add("\"Fashion & Style\"");
-                }
-                if (cbSportsCheckBox.isChecked()) {
-                    listOfNewsDesk.add("\"Sports\"");
-                }
-                for(String x : listOfNewsDesk ) {
-                    newsDeskQuery.append(x).append(" ");
-                }
-                newsDeskQuery.append(")");
-                mSharedPreferences.edit()
-                    .putString(STARTING_DATE, date)
-                    .putString(SORT_ORDER, order.toLowerCase())
-                    .putString(NEWS_DESK, newsDeskQuery.toString())
-                    .apply();
-                finish();
+                saveSettingsToSharedPreferences();
             }
         });
     }
 
     private String parseDate(String date) {
-        Pattern pt = Pattern.compile("[^0-9]");
-        Matcher match= pt.matcher(date);
-        while(match.find()){
-            date=date.replace(Character.toString(date.charAt(match.start())),"");
-        }
+        date = date.replaceAll("\\D+","");
         return date;
     }
 
@@ -114,16 +87,59 @@ public class SettingsActivity extends AppCompatActivity implements DatePickerDia
         etDatePicker.setText(date);
     }
 
-    // TODO check SharedPrefs before rendering UI
-    private void setSavedSettingsToUI() {
-//        String date = mSharedPreferences.getString(STARTING_DATE, null);
-//        if (date != null) {
-//            etDatePicker.setText(date);
-//        }
-//        String order = mSharedPreferences.getString(SORT_ORDER, null);
-//        if (order != null) {
-//            spnSortOrder.setId(order.equals("oldest") ? 0 : 1);
-//        }
-//        mSharedPreferences.getString(NEWS_DESK, null);
+    private void saveSettingsToSharedPreferences() {
+        String date = parseDate(etDatePicker.getText().toString());
+        String order = spnSortOrder.getSelectedItem().toString();
+        StringBuilder newsDeskQuery = new StringBuilder();
+        List<String> listOfNewsDesk = new ArrayList<>();
+        if (cbArtsCheckBox.isChecked()) {
+            listOfNewsDesk.add("\"Arts\"");
+        }
+        if (cbFashionCheckBox.isChecked()) {
+            listOfNewsDesk.add("\"Fashion & Style\"");
+        }
+        if (cbSportsCheckBox.isChecked()) {
+            listOfNewsDesk.add("\"Sports\"");
+        }
+        for(String x : listOfNewsDesk ) {
+            newsDeskQuery.append(x).append(" ");
+        }
+        mSharedPreferences.edit()
+            .putString(STARTING_DATE, date)
+            .putString(SORT_ORDER, order.toLowerCase())
+            .putString(NEWS_DESK, newsDeskQuery.toString())
+            .apply();
+        finish();
+    }
+
+    private void applySavedSettingsToUI() {
+        String date = mSharedPreferences.getString(STARTING_DATE, null);
+        if (date != null) {
+            String formatedDate = date.substring(0,4) + "/" + date.substring(4,6) + "/" + date.substring(6);
+            etDatePicker.setText(formatedDate);
+        }
+        String order = mSharedPreferences.getString(SORT_ORDER, null);
+        if (order != null) {
+            spnSortOrder.setSelection(order.equals("oldest") ? 0 : 1);
+        }
+        String news_desc = mSharedPreferences.getString(NEWS_DESK, null);
+        if (news_desc != null) {
+            if (news_desc.contains("Arts")) {
+                cbArtsCheckBox.setChecked(true);
+            } else {
+                cbArtsCheckBox.setChecked(false);
+            }
+            if (news_desc.contains("Fashion")) {
+                cbFashionCheckBox.setChecked(true);
+            } else {
+                cbFashionCheckBox.setChecked(false);
+            }
+            if (news_desc.contains("Sports")) {
+                cbSportsCheckBox.setChecked(true);
+            } else {
+                cbFashionCheckBox.setChecked(false);
+            }
+        }
+
     }
 }
