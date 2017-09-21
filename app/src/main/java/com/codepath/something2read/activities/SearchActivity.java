@@ -177,15 +177,19 @@ public class SearchActivity extends AppCompatActivity {
     }
 
     private RequestParams getAdditionalRequestParametersFromPrefs(RequestParams params) {
-        String startingDate = mSharedPreferences.getString(STARTING_DATE, null);
-        if (startingDate != null) {
-            params.put("begin_date", startingDate); //Format: YYYYMMDD
-        }
-        String order = mSharedPreferences.getString(SORT_ORDER, "newest");
-        params.put("sort", order);
-        String newsDeskQuery = mSharedPreferences.getString(NEWS_DESK, null);
-        if (!newsDeskQuery.isEmpty()) {
-            params.put("fq", "news_desk:(" + newsDeskQuery + ")");
+        try {
+            String startingDate = mSharedPreferences.getString(STARTING_DATE, null);
+            if (startingDate != null) {
+                params.put("begin_date", startingDate); //Format: YYYYMMDD
+            }
+            String order = mSharedPreferences.getString(SORT_ORDER, "newest");
+            params.put("sort", order);
+            String newsDeskQuery = mSharedPreferences.getString(NEWS_DESK, null);
+            if (!newsDeskQuery.isEmpty()) {
+                params.put("fq", "news_desk:(" + newsDeskQuery + ")");
+            }
+        } catch (NullPointerException e) {
+            //
         }
         return params;
     }
