@@ -8,6 +8,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,6 +17,7 @@ import android.widget.GridView;
 import com.codepath.something2read.R;
 import com.codepath.something2read.adapters.ArticleArrayAdapter;
 import com.codepath.something2read.models.Article;
+import com.codepath.something2read.utils.EndlessScrollListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -66,14 +68,39 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(i);
             }
         });
+        gvResults.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public boolean onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                loadNextDataFromApi(page);
+                // or loadNextDataFromApi(totalItemsCount);
+                return true; // TODO ONLY if more data is actually being loaded; false otherwise.
+            }
+        });
+        btnSearch.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mAdapter.clear();
+                etQuery.onEditorAction(EditorInfo.IME_ACTION_DONE);
+                onArticleSearch(0);
+            }
+        });
     }
-    public void onArticleSearch(View view) {
+
+    // Append the next page of data into the adapter
+    // This method probably sends out a network request and appends new data items to your adapter.
+    private void loadNextDataFromApi(int offset) {
+        // Send an API request to retrieve appropriate paginated data
+        onArticleSearch(offset);
+    }
+
+    public void onArticleSearch(int page) {
         String query = etQuery.getText().toString();
         AsyncHttpClient client = new AsyncHttpClient();
 
         RequestParams params = new RequestParams();
         params.put("api-key", API_KEY);
-        params.put("page", 0);
+        params.put("page", page);
         params.put("q", query);
         params = getAdditionalRequestParametersFromPrefs(params);
         client.get(SEARCH_API_ENDPOINT, params, new JsonHttpResponseHandler() {

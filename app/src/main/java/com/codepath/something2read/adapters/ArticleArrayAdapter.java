@@ -15,6 +15,8 @@ import com.codepath.something2read.R;
 import com.codepath.something2read.models.Article;
 import com.squareup.picasso.Picasso;
 
+import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
+
 import java.util.List;
 public class ArticleArrayAdapter extends ArrayAdapter<Article> {
 
@@ -41,7 +43,11 @@ public class ArticleArrayAdapter extends ArrayAdapter<Article> {
         String thumbnail = article.getThumbNail();
 
         if (!TextUtils.isEmpty(thumbnail)) {
-            Picasso.with(getContext()).load(thumbnail).into(imageView);
+            Picasso.with(getContext()).load(thumbnail)
+                .placeholder(R.drawable.placeholder)
+                .error(R.drawable.error)
+                .transform(new RoundedCornersTransformation(10, 10))
+                .into(imageView);
         }
 
         return convertView;
