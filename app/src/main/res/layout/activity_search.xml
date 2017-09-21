@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_margin="@dimen/margin"
-    tools:context="com.codepath.something2read.activities.MainActivity">
+    tools:context="com.codepath.something2read.activities.SearchActivity">
 
     <Button
         android:id="@+id/btnSearch"

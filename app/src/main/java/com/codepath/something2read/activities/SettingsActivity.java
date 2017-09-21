@@ -24,12 +24,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SettingsActivity extends AppCompatActivity implements DatePickerDialog.OnDateSetListener {
-    @BindView(R.id.save_button) Button mSaveButton;
-    @BindView(R.id.begin_date_picker) EditText mDatePicker;
-    @BindView(R.id.sort_order_picker) Spinner mSpinner;
-    @BindView(R.id.checkBox) CheckBox mArtsCheckBox;
-    @BindView(R.id.checkBox2) CheckBox mFashionCheckBox;
-    @BindView(R.id.checkBox3) CheckBox mSportsCheckBox;
+    @BindView(R.id.save_button) Button btnSaveButton;
+    @BindView(R.id.begin_date_picker) EditText etDatePicker;
+    @BindView(R.id.sort_order_picker) Spinner spnSortOrder;
+    @BindView(R.id.valueArts) CheckBox cbArtsCheckBox;
+    @BindView(R.id.valueFashionStyle) CheckBox cbFashionCheckBox;
+    @BindView(R.id.valueSports) CheckBox cbSportsCheckBox;
 
     final static String PREFS_NAME = "FilterSettingsFile";
 
@@ -48,20 +48,20 @@ public class SettingsActivity extends AppCompatActivity implements DatePickerDia
 
         mSharedPreferences = getSharedPreferences(PREFS_NAME, 0);
         setSavedSettingsToUI();
-        mSaveButton.setOnClickListener(new View.OnClickListener() {
+        btnSaveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String date = parseDate(mDatePicker.getText().toString());
-                String order = mSpinner.getSelectedItem().toString();
+                String date = parseDate(etDatePicker.getText().toString());
+                String order = spnSortOrder.getSelectedItem().toString();
                 StringBuilder newsDeskQuery = new StringBuilder("news_desk:(");
                 List<String> listOfNewsDesk = new ArrayList<>();
-                if (mArtsCheckBox.isChecked()) {
+                if (cbArtsCheckBox.isChecked()) {
                     listOfNewsDesk.add("\"Arts\"");
                 }
-                if (mFashionCheckBox.isChecked()) {
+                if (cbFashionCheckBox.isChecked()) {
                     listOfNewsDesk.add("\"Fashion & Style\"");
                 }
-                if (mSportsCheckBox.isChecked()) {
+                if (cbSportsCheckBox.isChecked()) {
                     listOfNewsDesk.add("\"Sports\"");
                 }
                 for(String x : listOfNewsDesk ) {
@@ -111,18 +111,18 @@ public class SettingsActivity extends AppCompatActivity implements DatePickerDia
             day = "0" + dayOfMonth;
         }
         String date = "" + year + "/" + month + "/" + day;
-        mDatePicker.setText(date);
+        etDatePicker.setText(date);
     }
 
     // TODO check SharedPrefs before rendering UI
     private void setSavedSettingsToUI() {
 //        String date = mSharedPreferences.getString(STARTING_DATE, null);
 //        if (date != null) {
-//            mDatePicker.setText(date);
+//            etDatePicker.setText(date);
 //        }
 //        String order = mSharedPreferences.getString(SORT_ORDER, null);
 //        if (order != null) {
-//            mSpinner.setId(order.equals("oldest") ? 0 : 1);
+//            spnSortOrder.setId(order.equals("oldest") ? 0 : 1);
 //        }
 //        mSharedPreferences.getString(NEWS_DESK, null);
     }

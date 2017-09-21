@@ -63,7 +63,7 @@
         android:text="@string/news_values_label"/>
 
     <CheckBox
-        android:id="@+id/checkBox"
+        android:id="@+id/valueArts"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignBottom="@+id/news_values_label"
@@ -72,23 +72,23 @@
         android:text="@string/arts_checkbox"/>
 
     <CheckBox
-        android:id="@+id/checkBox2"
+        android:id="@+id/valueFashionStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/checkBox"
-        android:layout_alignStart="@+id/checkBox"
-        android:layout_below="@+id/checkBox"
+        android:layout_alignLeft="@+id/valueArts"
+        android:layout_alignStart="@+id/valueArts"
+        android:layout_below="@+id/valueArts"
         android:layout_marginTop="20dp"
         android:text="@string/fashion_checkbox"/>
 
     <CheckBox
-        android:id="@+id/checkBox3"
+        android:id="@+id/valueSports"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/checkBox2"
-        android:layout_alignStart="@+id/checkBox2"
+        android:layout_alignLeft="@+id/valueFashionStyle"
+        android:layout_alignStart="@+id/valueFashionStyle"
         android:layout_marginTop="20dp"
-        android:layout_below="@+id/checkBox2"
+        android:layout_below="@+id/valueFashionStyle"
         android:layout_centerVertical="true"
         android:text="@string/sports_checkbox"/>
 
@@ -97,7 +97,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/margin"
-        android:layout_below="@id/checkBox3"
+        android:layout_below="@id/valueSports"
         android:text="@string/save_button"
         android:layout_centerHorizontal="true"/>
 </RelativeLayout>
