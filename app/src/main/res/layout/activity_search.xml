@@ -14,13 +14,9 @@
         android:layout_height="wrap_content"/>
     <!-- Rest of content for the activity -->
 
-    <GridView
-        android:id="@+id/gvResults"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rvResults"
         android:layout_below="@+id/toolbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:numColumns="4"/>
+        android:layout_height="match_parent" />
 </RelativeLayout>

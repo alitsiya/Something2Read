@@ -8,20 +8,19 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.GridView;
 import android.widget.Toast;
 
 import com.codepath.something2read.R;
-import com.codepath.something2read.adapters.ArticleArrayAdapter;
+import com.codepath.something2read.adapters.ArticleAdapter;
 import com.codepath.something2read.models.Article;
-import com.codepath.something2read.utils.EndlessScrollListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -40,17 +39,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.codepath.something2read.activities.SettingsActivity.NEWS_DESK;
-import static com.codepath.something2read.activities.SettingsActivity.SORT_ORDER;
 import static com.codepath.something2read.activities.SettingsActivity.PREFS_NAME;
+import static com.codepath.something2read.activities.SettingsActivity.SORT_ORDER;
 import static com.codepath.something2read.activities.SettingsActivity.STARTING_DATE;
 
 public class SearchActivity extends AppCompatActivity {
     private final Logger mLogger = LoggerFactory.getLogger(SearchActivity.class);
 
-    @BindView(R.id.gvResults) GridView gvResults;
+    @BindView(R.id.rvResults) RecyclerView rvResults;
 
     ArrayList<Article> mArticles = new ArrayList<>();
-    ArticleArrayAdapter mAdapter;
+    ArticleAdapter mAdapter;
     private String mQuery;
     private SharedPreferences mSharedPreferences;
 
@@ -63,34 +62,45 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         ButterKnife.bind(this);
-
+        getArticles();
         // Find the toolbar view inside the activity layout
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         // Sets the Toolbar to act as the ActionBar for this Activity window.
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
 
-        mAdapter = new ArticleArrayAdapter(this, mArticles);
-        gvResults.setAdapter(mAdapter);
+        // Lookup the recyclerview in activity layout
+        RecyclerView rvResults = (RecyclerView) findViewById(R.id.rvResults);
+
+        // Create adapter passing in the sample user data
+        ArticleAdapter adapter = new ArticleAdapter(this, mArticles);
+        // Attach the adapter to the recyclerview to populate items
+        rvResults.setAdapter(adapter);
+        // Set layout manager to position the items. 0 - hor, 1 - vert
+        rvResults.setLayoutManager(new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL));
+
+
+//        mAdapter = new ArticleAdapter(this, mArticles);
+//        rvResults.setAdapter(mAdapter);
         mSharedPreferences = getSharedPreferences(PREFS_NAME, 0);
-        gvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent i = new Intent(getApplicationContext(), ArticleActivity.class);
-                Article article = mArticles.get(position);
-                i.putExtra("article", article);
-                startActivity(i);
-            }
-        });
-        gvResults.setOnScrollListener(new EndlessScrollListener() {
-            @Override
-            public boolean onLoadMore(int page, int totalItemsCount) {
-                // Triggered only when new data needs to be appended to the list
-                loadNextDataFromApi(page);
-                // or loadNextDataFromApi(totalItemsCount);
-                return true;
-            }
-        });
+//        rvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//                Intent i = new Intent(getApplicationContext(), ArticleActivity.class);
+//                Article article = mArticles.get(position);
+//                i.putExtra("article", article);
+//                startActivity(i);
+//            }
+//        });
+//        rvResults.setOnScrollListener(new EndlessScrollListener() {
+//            @Override
+//            public boolean onLoadMore(int page, int totalItemsCount) {
+//                // Triggered only when new data needs to be appended to the list
+//                loadNextDataFromApi(page);
+//                // or loadNextDataFromApi(totalItemsCount);
+//                return true;
+//            }
+//        });
     }
 
     // Append the next page of data into the adapter
@@ -120,13 +130,46 @@ public class SearchActivity extends AppCompatActivity {
                 JSONArray articleJsonResults;
                 try {
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+
+                    // record this value before making any changes to the existing list
+                    int curSize = mAdapter.getItemCount();
+                    // update the existing list
                     mArticles.addAll(Article.fromJSONArray(articleJsonResults));
-                    mAdapter.notifyDataSetChanged();
+                    // curSize should represent the first element that got added
+                    // newItems.size() represents the itemCount
+                    mAdapter.notifyItemRangeInserted(curSize, articleJsonResults.length());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         });
+    }
+
+    private ArrayList<Article> getArticles() {
+        AsyncHttpClient client = new AsyncHttpClient();
+        RequestParams params = new RequestParams();
+        params.put("api-key", API_KEY);
+        params.put("page", 0);
+        params.put("q", "putin");
+        client.get(SEARCH_API_ENDPOINT, params, new JsonHttpResponseHandler() {
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                super.onFailure(statusCode, headers, throwable, errorResponse);
+            }
+
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                super.onSuccess(statusCode, headers, response);
+                JSONArray articleJsonResults;
+                try {
+                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
+                    mArticles.addAll(Article.fromJSONArray(articleJsonResults));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        return mArticles;
     }
 
     @Override
@@ -140,7 +183,7 @@ public class SearchActivity extends AppCompatActivity {
             public boolean onQueryTextSubmit(String query) {
                 // perform query here
                 mQuery = query;
-                mAdapter.clear();
+//                mAdapter.clear();
                 if (isNetworkAvailable() || isOnline()) {
                     onArticleSearch(0);
                 } else {

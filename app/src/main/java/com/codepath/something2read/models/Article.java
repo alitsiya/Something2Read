@@ -12,8 +12,7 @@ public class Article implements Serializable {
     String webUrl;
     String headline;
     String thumbNail;
-
-
+    
     public String getWebUrl() {
         return webUrl;
     }
