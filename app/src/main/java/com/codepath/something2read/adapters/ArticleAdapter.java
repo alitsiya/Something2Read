@@ -1,24 +1,17 @@
 package com.codepath.something2read.adapters;
 
 import android.content.Context;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+
 import android.support.v7.widget.RecyclerView;
-import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.codepath.something2read.R;
 import com.codepath.something2read.models.Article;
 import com.squareup.picasso.Picasso;
-
-import jp.wasabeef.picasso.transformations.RoundedCornersTransformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +23,15 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     private List<Article> mArticles = new ArrayList<>();
     // Store the context for easy access
     private Context mContext;
+    private ItemClickListener mClickListener;
+
+    public interface ItemClickListener {
+        void onItemClicked(View v, Article article);
+    }
 
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
-    public class ViewHolder extends RecyclerView.ViewHolder {
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
         public ImageView ivImage;
@@ -48,15 +46,21 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
 
             ivImage = (ImageView) itemView.findViewById(R.id.ivImage);
             tvTitle = (TextView) itemView.findViewById(R.id.tvTitle);
+            itemView.setOnClickListener(this);
+        }
+        @Override
+        public void onClick(View v) {
+            int position = getAdapterPosition();
+            Article article = mArticles.get(position);
+            mClickListener.onItemClicked(v, article);
         }
     }
 
-
     // Pass in the contact array into the constructor
-    public ArticleAdapter(Context context, List<Article> articles) {
+    public ArticleAdapter(Context context, List<Article> articles, ItemClickListener listener) {
         mArticles = articles;
         mContext = context;
-//        super(context, android.R.layout.simple_list_item_1, articles);
+        mClickListener = listener;
     }
 
     // Easy access to the context object in the recyclerview
@@ -85,9 +89,9 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
 
         // Set item views based on your views and data model
         ImageView imageView = viewHolder.ivImage;
-        Log.d("@@@", "Loading image " + article.getThumbNail());
         if (article.getThumbNail() != null) {
-            Picasso.with(mContext).load(article.getThumbNail()).into(imageView);
+            Picasso.with(mContext).load(article.getThumbNail())
+                .into(imageView);
         } else {
             Picasso.with(mContext)
                 .load(URL)
@@ -102,33 +106,4 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
     public int getItemCount() {
         return mArticles.size();
     }
-
-//    @NonNull
-//    @Override
-//    public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-//        Article article = this.getItem(position);
-//
-//        if (convertView == null) {
-//            LayoutInflater inflater = LayoutInflater.from(getContext());
-//            convertView = inflater.inflate(R.layout.item_article_result, parent, false);
-//        }
-//
-//        ImageView imageView = (ImageView) convertView.findViewById(R.id.ivImage);
-//        imageView.setImageResource(0);
-//
-//        TextView tvTitle = (TextView) convertView.findViewById(R.id.tvTitle);
-//        tvTitle.setText(article.getHeadline());
-//
-//        String thumbnail = article.getThumbNail();
-//
-//        if (!TextUtils.isEmpty(thumbnail)) {
-//            Picasso.with(getContext()).load(thumbnail)
-//                .placeholder(R.drawable.placeholder)
-//                .error(R.drawable.error)
-//                .transform(new RoundedCornersTransformation(10, 10))
-//                .into(imageView);
-//        }
-//
-//        return convertView;
-//    }
 }

@@ -8,6 +8,7 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -16,10 +17,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Toast;
 
 import com.codepath.something2read.R;
 import com.codepath.something2read.adapters.ArticleAdapter;
+import com.codepath.something2read.adapters.EndlessRecyclerViewScrollListener;
 import com.codepath.something2read.models.Article;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -43,15 +46,17 @@ import static com.codepath.something2read.activities.SettingsActivity.PREFS_NAME
 import static com.codepath.something2read.activities.SettingsActivity.SORT_ORDER;
 import static com.codepath.something2read.activities.SettingsActivity.STARTING_DATE;
 
-public class SearchActivity extends AppCompatActivity {
+public class SearchActivity extends AppCompatActivity implements ArticleAdapter.ItemClickListener {
     private final Logger mLogger = LoggerFactory.getLogger(SearchActivity.class);
 
     @BindView(R.id.rvResults) RecyclerView rvResults;
 
-    ArrayList<Article> mArticles = new ArrayList<>();
+    ArrayList<Article> mArticles;
     ArticleAdapter mAdapter;
     private String mQuery;
     private SharedPreferences mSharedPreferences;
+
+    private EndlessRecyclerViewScrollListener mScrollListener;
 
     private static String SEARCH_API_ENDPOINT = "https://api.nytimes.com/svc/search/v2/articlesearch.json";
     private final String API_KEY = "4bd426acd50844b1a81d7d5ffc5a4768";
@@ -62,45 +67,33 @@ public class SearchActivity extends AppCompatActivity {
         setContentView(R.layout.activity_search);
 
         ButterKnife.bind(this);
-        getArticles();
         // Find the toolbar view inside the activity layout
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         // Sets the Toolbar to act as the ActionBar for this Activity window.
         // Make sure the toolbar exists in the activity and is not null
         setSupportActionBar(toolbar);
-
-        // Lookup the recyclerview in activity layout
-        RecyclerView rvResults = (RecyclerView) findViewById(R.id.rvResults);
-
+        mArticles = new ArrayList<>();
         // Create adapter passing in the sample user data
-        ArticleAdapter adapter = new ArticleAdapter(this, mArticles);
+        mAdapter = new ArticleAdapter(this, mArticles, this);
+
         // Attach the adapter to the recyclerview to populate items
-        rvResults.setAdapter(adapter);
-        // Set layout manager to position the items. 0 - hor, 1 - vert
-        rvResults.setLayoutManager(new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL));
+        rvResults.setAdapter(mAdapter);
+        // Set layout manager to position the items. 0 - HORIZONTAL, 1 - VERTICAL
+        StaggeredGridLayoutManager layoutManager =
+            new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
+        rvResults.setLayoutManager(layoutManager);
+        RecyclerView.ItemDecoration itemDecoration = new
+            DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL);
+        rvResults.addItemDecoration(itemDecoration);
 
-
-//        mAdapter = new ArticleAdapter(this, mArticles);
-//        rvResults.setAdapter(mAdapter);
+        mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                loadNextDataFromApi(page);
+            }
+        };
+        rvResults.addOnScrollListener(mScrollListener);
         mSharedPreferences = getSharedPreferences(PREFS_NAME, 0);
-//        rvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//                Intent i = new Intent(getApplicationContext(), ArticleActivity.class);
-//                Article article = mArticles.get(position);
-//                i.putExtra("article", article);
-//                startActivity(i);
-//            }
-//        });
-//        rvResults.setOnScrollListener(new EndlessScrollListener() {
-//            @Override
-//            public boolean onLoadMore(int page, int totalItemsCount) {
-//                // Triggered only when new data needs to be appended to the list
-//                loadNextDataFromApi(page);
-//                // or loadNextDataFromApi(totalItemsCount);
-//                return true;
-//            }
-//        });
     }
 
     // Append the next page of data into the adapter
@@ -120,56 +113,26 @@ public class SearchActivity extends AppCompatActivity {
         params = getAdditionalRequestParametersFromPrefs(params);
         client.get(SEARCH_API_ENDPOINT, params, new JsonHttpResponseHandler() {
             @Override
-            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
-                super.onFailure(statusCode, headers, throwable, errorResponse);
-            }
-
-            @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 super.onSuccess(statusCode, headers, response);
                 JSONArray articleJsonResults;
                 try {
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-
-                    // record this value before making any changes to the existing list
-                    int curSize = mAdapter.getItemCount();
                     // update the existing list
                     mArticles.addAll(Article.fromJSONArray(articleJsonResults));
                     // curSize should represent the first element that got added
                     // newItems.size() represents the itemCount
-                    mAdapter.notifyItemRangeInserted(curSize, articleJsonResults.length());
+                    mAdapter.notifyDataSetChanged();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-        });
-    }
 
-    private ArrayList<Article> getArticles() {
-        AsyncHttpClient client = new AsyncHttpClient();
-        RequestParams params = new RequestParams();
-        params.put("api-key", API_KEY);
-        params.put("page", 0);
-        params.put("q", "putin");
-        client.get(SEARCH_API_ENDPOINT, params, new JsonHttpResponseHandler() {
             @Override
             public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
                 super.onFailure(statusCode, headers, throwable, errorResponse);
             }
-
-            @Override
-            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
-                super.onSuccess(statusCode, headers, response);
-                JSONArray articleJsonResults;
-                try {
-                    articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-                    mArticles.addAll(Article.fromJSONArray(articleJsonResults));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
         });
-        return mArticles;
     }
 
     @Override
@@ -192,12 +155,17 @@ public class SearchActivity extends AppCompatActivity {
                 // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
                 // see https://code.google.com/p/android/issues/detail?id=24599
                 searchView.clearFocus();
-
                 return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
+                if (newText.isEmpty()) {
+                    // Clear view when search query is cleared
+                    mArticles.clear();
+                    mAdapter.notifyDataSetChanged();
+                    mScrollListener.resetState();
+                }
                 return false;
             }
         });
@@ -259,4 +227,10 @@ public class SearchActivity extends AppCompatActivity {
         return false;
     }
 
+    @Override
+    public void onItemClicked(View v, Article article) {
+        Intent i = new Intent(this, ArticleActivity.class);
+        i.putExtra("article", article);
+        startActivity(i);
+    }
 }
