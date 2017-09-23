@@ -18,7 +18,6 @@ import java.util.List;
 
 public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHolder> {
 
-    private static String URL = "https://alwaysevie.files.wordpress.com/2012/07/teacup-kittens2.jpg";
     // Store a member variable for the contacts
     private List<Article> mArticles = new ArrayList<>();
     // Store the context for easy access
@@ -91,10 +90,6 @@ public class ArticleAdapter extends RecyclerView.Adapter<ArticleAdapter.ViewHold
         ImageView imageView = viewHolder.ivImage;
         if (article.getThumbNail() != null) {
             Picasso.with(mContext).load(article.getThumbNail())
-                .into(imageView);
-        } else {
-            Picasso.with(mContext)
-                .load(URL)
                 .into(imageView);
         }
         TextView textView = viewHolder.tvTitle;

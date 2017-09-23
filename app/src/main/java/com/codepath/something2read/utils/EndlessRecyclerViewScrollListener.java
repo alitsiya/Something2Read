@@ -1,4 +1,4 @@
-package com.codepath.something2read.adapters;
+package com.codepath.something2read.utils;
 
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;

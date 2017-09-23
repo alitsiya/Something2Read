@@ -8,7 +8,6 @@ import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -22,7 +21,7 @@ import android.widget.Toast;
 
 import com.codepath.something2read.R;
 import com.codepath.something2read.adapters.ArticleAdapter;
-import com.codepath.something2read.adapters.EndlessRecyclerViewScrollListener;
+import com.codepath.something2read.utils.EndlessRecyclerViewScrollListener;
 import com.codepath.something2read.models.Article;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
@@ -82,9 +81,6 @@ public class SearchActivity extends AppCompatActivity implements ArticleAdapter.
         StaggeredGridLayoutManager layoutManager =
             new StaggeredGridLayoutManager(2, LinearLayoutManager.VERTICAL);
         rvResults.setLayoutManager(layoutManager);
-        RecyclerView.ItemDecoration itemDecoration = new
-            DividerItemDecoration(this, DividerItemDecoration.HORIZONTAL);
-        rvResults.addItemDecoration(itemDecoration);
 
         mScrollListener = new EndlessRecyclerViewScrollListener(layoutManager) {
             @Override

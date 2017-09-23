@@ -40,13 +40,14 @@ The following **bonus** features are implemented:
 
 The following **additional** features are implemented:
 
-* [ ] List anything else that you can get done to improve the app functionality!
+* [x] List anything else that you can get done to improve the app functionality!
+CardView
 
 ## Video Walkthrough
 
 Here's a walkthrough of implemented user stories:
 
-<a href='https://www.dropbox.com/s/yw5qsmbxi1u6oud/device-2017-09-23-122704.mp4?dl=0' title='Video Walkthrough' width='' alt='Video Walkthrough' >Link to DropBox</a>
+<a href='https://www.dropbox.com/s/8gq4rp1klc1fzj3/device-2017-09-23-125558.mp4?dl=0' title='Video Walkthrough' width='' alt='Video Walkthrough' >Link to DropBox</a>
 
 ## Notes
 
